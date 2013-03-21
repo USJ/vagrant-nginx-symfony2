@@ -52,6 +52,22 @@ class nginx-php-mongo {
 		before => Package["python-software-properties"]
 	}
 
+	exec { 'wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.20.5.deb':
+		command => '/usr/bin/wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.20.5.deb',
+		cwd => '/tmp'
+	}
+
+	exec { 'dpkg -i elasticsearch-0.20.5.deb':
+		command => '/usr/bin/dpkg -i elasticsearch-0.20.5.deb',
+		cwd => '/tmp',
+		require => [Exec['wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.20.5.deb'], Package["openjdk-7-jre-headless"]]
+	}
+
+	service { 'elasticsearch':
+		ensure => 'running',
+		require => Exec['dpkg -i elasticsearch-0.20.5.deb']
+	}
+
 	package { 'php5-imagick':
 		notify => Service["php5-fpm"],
 		require => [Package["libmagickwand-dev"], Package["libmagickcore-dev"],Package[$php]],
